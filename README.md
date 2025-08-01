@@ -48,7 +48,7 @@
 1.  **Run the application:**
 
     ```bash
-    python PyTUI_Music.py
+    ./main.py
     ```
 
 2.  **Adding a Music Path:**
@@ -70,6 +70,8 @@
     - **↑/↓**: Navigate the playlist.
     - **Enter**: Play the selected song.
     - **p**: Toggle play/pause.
-    - **n**: Play the next song in the playlist.
+    - **b**: Play the previous song.
+    - **n**: Play the next song.
     - **9/0**: Decrease/increase volume.
+    - **l**: Lock the song.
     - **q**: Quit the player and return to the folder selection menu.

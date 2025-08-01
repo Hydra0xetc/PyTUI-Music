@@ -10,7 +10,7 @@ from tui import draw_message_box
 
 supported_exts = ('.mp3', '.wav', '.flac', '.m4a', '.ogg')
 
-def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlist_view_offset, now_playing_text_scroll_offset, selected_song_text_scroll_offset):
+def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlist_view_offset, now_playing_text_scroll_offset, selected_song_text_scroll_offset, song_lock):
     h, w = stdscr.getmaxyx()
     max_width = w - 4
 
@@ -38,7 +38,7 @@ def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlis
         filled_length = int(bar_length_calc * progress)
         bar_str = '#' * filled_length + '.' * (bar_length_calc - filled_length)
 
-    full_time_str = f"{time_str_base} [{bar_str}]" if bar_str else time_str_base
+    full_time_str = f"{time_str_base} [{bar_str}];" if bar_str else time_str_base
     
     # Truncate full_time_str before adding to screen
     truncated_full_time_str = truncate_string_to_width(full_time_str, w - 4) # w - 4 for padding
@@ -49,6 +49,12 @@ def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlis
         paused_x = w - wcswidth(paused_text) - 2 # Position from right edge
         if paused_x < 2: paused_x = 2 # Ensure it doesn't go off screen to the left
         stdscr.addstr(1, paused_x, paused_text, curses.A_REVERSE)
+
+    if song_lock:
+        lock_text = "[LOCKED]"
+        lock_x = w - wcswidth(lock_text) - 2
+        if lock_x < 2: lock_x = 2
+        stdscr.addstr(2, lock_x, lock_text, curses.A_REVERSE)
 
     stdscr.hline(4, 1, curses.ACS_HLINE, w - 2)
 
@@ -80,7 +86,7 @@ def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlis
     # Footer
     vol = player.volume
     help1 = f"Volume: {vol:.0f}% (9/0)"
-    help2 = "↑/↓: Select | Enter: Play | p: Pause | n: Next | q: Exit"
+    help2 = "↑/↓: Select | Enter: Play | p: Pause | l: Lock | b/n: Prev/Next | q: Exit"
 
     # Truncate help texts to fit within screen width
     max_footer_width = w - 4 # 2 chars padding on each side
@@ -131,6 +137,7 @@ def player_tui(stdscr, folder_path, initial_volume, config):
         now_playing_scroll_counter = 0
         current_playing_id = None
         last_selected_idx = -1
+        song_lock = False
 
         while True:
             try:
@@ -147,7 +154,7 @@ def player_tui(stdscr, folder_path, initial_volume, config):
 
                 draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx,
                                 playlist_view_offset, now_playing_text_scroll_offset,
-                                selected_song_text_scroll_offset)
+                                selected_song_text_scroll_offset, song_lock)
 
                 now_playing_scroll_counter += 1
                 if now_playing_scroll_counter >= 3:  # Scroll faster
@@ -181,6 +188,15 @@ def player_tui(stdscr, folder_path, initial_volume, config):
                 player.pause = False
             elif key == ord('p'):
                 player.pause = not player.pause
+            elif key == ord('l'):
+                song_lock = not song_lock
+                player.loop_file = 'inf' if song_lock else False
+            elif key == ord('b'):
+                if len(playlist) > 0:
+                    if player.playlist_pos == 0:
+                        player.playlist_pos = len(playlist) - 1
+                    else:
+                        player.playlist_prev()
             elif key == ord('n'):
                 if len(playlist) > 0:
                     # Check if the current song is the last in the playlist
@@ -189,11 +205,11 @@ def player_tui(stdscr, folder_path, initial_volume, config):
                     else:
                         player.playlist_next()
             elif key == ord('9'):
-                player.volume = max(0, player.volume - 5)
+                player.volume = max(0, player.volume - 2)
                 config['volume'] = player.volume # Update volume in config
                 save_config(config) # Save config
             elif key == ord('0'):
-                player.volume = min(100, player.volume + 5)
+                player.volume = min(100, player.volume + 2)
                 config['volume'] = player.volume # Update volume in config
                 save_config(config) # Save config
             elif key == ord('q'):
