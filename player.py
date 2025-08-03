@@ -36,7 +36,7 @@ def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlis
     if dur > 0 and bar_length_calc > 5:
         progress = (pos / dur)
         filled_length = int(bar_length_calc * progress)
-        bar_str = '#' * filled_length + '.' * (bar_length_calc - filled_length)
+        bar_str = '█' * filled_length + '.' * (bar_length_calc - filled_length)
 
     full_time_str = f"{time_str_base} [{bar_str}];" if bar_str else time_str_base
     
@@ -72,7 +72,7 @@ def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlis
         song_idx = i + playlist_view_offset
         if song_idx < len(playlist):
             song_name = os.path.basename(playlist[song_idx])
-            prefix = "> " if song_idx == playing_idx else "  "
+            prefix = ">  " if song_idx == playing_idx else "  "
             item_number = f"{song_idx + 1}."
 
             max_song_width = max_width - len(prefix) - len(item_number) - 1
@@ -209,7 +209,7 @@ def player_tui(stdscr, folder_path, initial_volume, config):
                 config['volume'] = player.volume # Update volume in config
                 save_config(config) # Save config
             elif key == ord('0'):
-                player.volume = min(100, player.volume + 2)
+                player.volume = min(150, player.volume + 2)
                 config['volume'] = player.volume # Update volume in config
                 save_config(config) # Save config
             elif key == ord('q'):

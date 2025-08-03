@@ -88,7 +88,7 @@ def draw_message_box(stdscr, message):
     box_win.addstr(msg_y, msg_x, truncated_message)
     
     box_win.refresh()
-    stdscr.getch() # Wait for user to press a key
+    box_win.getch() # wait for user to press a key
 
 def browse_path_tui(stdscr, start_path=None):
     """A simple TUI for browsing the filesystem."""
