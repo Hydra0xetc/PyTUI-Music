@@ -5,7 +5,7 @@ CONFIG_FILE = os.path.expanduser("~/.configure.json")  # Consolidated config fil
 
 def load_config():
     """Loads the configuration from the config file."""
-    default_config = {'paths': [], 'volume': 50}
+    default_config = {'paths': [], 'volume': 50, 'audio_backend': 'auto'}
     try:
         if os.path.exists(CONFIG_FILE):
             with open(CONFIG_FILE, 'r') as f:

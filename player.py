@@ -113,13 +113,11 @@ def player_tui(stdscr, folder_path, initial_volume, config):
 
     try:
         player = mpv.MPV(
-            
             video=False,
             input_default_bindings=False,
             input_vo_keyboard=False,
             osc=False,
-            audio_device='opensles', # Example, adjust as needed
-            ao='opensles', # Example, adjust as needed
+            audio_device=config.get('audio_backend', 'auto'),
             vo='null'
         )
         player.volume = initial_volume
