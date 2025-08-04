@@ -3,6 +3,7 @@ import curses
 import time
 import sys
 import mpv
+import subprocess
 from wcwidth import wcswidth
 from utils import truncate_string_to_width, get_scrolling_display_string
 from config import save_config
@@ -10,7 +11,7 @@ from tui import draw_message_box
 
 supported_exts = ('.mp3', '.wav', '.flac', '.m4a', '.ogg')
 
-def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlist_view_offset, now_playing_text_scroll_offset, selected_song_text_scroll_offset, song_lock):
+def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlist_view_offset, now_playing_text_scroll_offset, selected_song_text_scroll_offset, song_lock, config):
     h, w = stdscr.getmaxyx()
     max_width = w - 4
 
@@ -86,7 +87,9 @@ def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlis
     # Footer
     vol = player.volume
     help1 = f"Volume: {vol:.0f}% (9/0)"
-    help2 = "↑/↓: Select | Enter: Play | p: Pause | l: Lock | b/n: Prev/Next | q: Exit"
+    cava_help = " | C : cava" if config.get('cava', False) else ""
+    help2 = f"↑/↓: Select | Enter: Play | p: Pause | l: Lock | b/n: Prev/Next{cava_help} | q: Exit"
+
 
     # Truncate help texts to fit within screen width
     max_footer_width = w - 4 # 2 chars padding on each side
@@ -152,7 +155,7 @@ def player_tui(stdscr, folder_path, initial_volume, config):
 
                 draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx,
                                 playlist_view_offset, now_playing_text_scroll_offset,
-                                selected_song_text_scroll_offset, song_lock)
+                                selected_song_text_scroll_offset, song_lock, config)
 
                 now_playing_scroll_counter += 1
                 if now_playing_scroll_counter >= 3:  # Scroll faster
@@ -164,10 +167,6 @@ def player_tui(stdscr, folder_path, initial_volume, config):
 
 
             except Exception as e:
-                # Log the error and continue the loop to prevent premature exit
-                # For a TUI, printing to stderr might be better than a message box
-                # if the TUI is still active.
-                # For now, we'll just print to stderr and continue.
                 sys.stderr.write(f"Error in player loop: {e}\n")
                 sys.stderr.flush()
                 continue
@@ -177,7 +176,20 @@ def player_tui(stdscr, folder_path, initial_volume, config):
             if key == -1:
                 continue
 
-            if key == curses.KEY_UP:
+            if key == ord('C'):
+                if config.get('cava', False):
+                    curses.endwin()
+                    try:
+                        subprocess.run(['cava'])
+                    except FileNotFoundError:
+                        stdscr.clear()
+                        draw_message_box(stdscr, "Cava command not found. Please install it.")
+                    except Exception as e:
+                        stdscr.clear()
+                        draw_message_box(stdscr, f"Error running Cava: {e}")
+                    stdscr.refresh()
+                    continue
+            elif key == curses.KEY_UP:
                 selected_idx = max(0, selected_idx - 1)
             elif key == curses.KEY_DOWN:
                 selected_idx = min(len(playlist) - 1, selected_idx + 1)
@@ -197,19 +209,18 @@ def player_tui(stdscr, folder_path, initial_volume, config):
                         player.playlist_prev()
             elif key == ord('n'):
                 if len(playlist) > 0:
-                    # Check if the current song is the last in the playlist
                     if player.playlist_pos == len(playlist) - 1:
-                        player.playlist_pos = 0  # Start from the beginning
+                        player.playlist_pos = 0
                     else:
                         player.playlist_next()
             elif key == ord('9'):
                 player.volume = max(0, player.volume - 2)
-                config['volume'] = player.volume # Update volume in config
-                save_config(config) # Save config
+                config['volume'] = player.volume
+                save_config(config)
             elif key == ord('0'):
                 player.volume = min(150, player.volume + 2)
-                config['volume'] = player.volume # Update volume in config
-                save_config(config) # Save config
+                config['volume'] = player.volume
+                save_config(config)
             elif key == ord('q'):
                 player.quit()
                 break
