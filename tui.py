@@ -1,5 +1,7 @@
 import curses
 import os
+import subprocess
+import shutil
 from wcwidth import wcswidth
 from utils import truncate_string_to_width, get_scrolling_display_string
 
@@ -90,52 +92,41 @@ def draw_message_box(stdscr, message):
     box_win.refresh()
     box_win.getch() # wait for user to press a key
 
+def check_dependencies():
+    """Check if fd and fzf are installed."""
+    return shutil.which("fd") is not None and shutil.which("fzf") is not None
+
 def browse_path_tui(stdscr, start_path=None):
-    """A simple TUI for browsing the filesystem."""
-    curses.curs_set(0)
-    current_path = start_path if start_path and os.path.isdir(start_path) else os.path.expanduser("~")
-    selected_row = 0
+    """A TUI for browsing the filesystem using fd and fzf."""
+    if not check_dependencies():
+        draw_message_box(stdscr, "Please install 'fd' and 'fzf' for path selection.")
+        return None
 
-    while True:
-        try:
-            # Get directory contents, filtering out hidden ones
-            all_contents = os.listdir(current_path)
-            dirs = sorted([d for d in all_contents if os.path.isdir(os.path.join(current_path, d)) and not d.startswith('.')])
-            files = sorted([f for f in all_contents if os.path.isfile(os.path.join(current_path, f)) and not f.startswith('.')])
-            
-            # Menu items
-            menu_items = ["[ Select Current Directory ]", "[../]"] + dirs + files
-        except PermissionError:
-            # Go back if we can't read the directory
-            current_path = os.path.dirname(current_path)
-            continue
+    # Exit curses mode to run fzf
+    curses.endwin()
 
-        draw_menu(stdscr, selected_row, menu_items, f"Browse: {current_path}", "↑/↓: Nav | Enter: Open | s: Select | q: Back")
-        curses.doupdate()
+    selected_path = None
+    try:
+        # Run fd and pipe to fzf
+        # Start searching from the user's home directory
+        home_dir = os.path.expanduser("~")
+        # We search for directories in the home directory.
+        command = f"fd -L --type d . '{home_dir}' | fzf"
+        
+        # Using shell=True is necessary for the pipe
+        process = subprocess.run(command, shell=True, capture_output=True, text=True, check=False)
+        
+        # fzf returns a non-zero exit code (130) when the user cancels (e.g., by pressing Esc).
+        if process.returncode == 0:
+            selected_path = process.stdout.strip()
 
-        key = stdscr.getch()
+    finally:
+        # After the command, we need to get back into curses mode.
+        # A simple refresh of the stdscr should do the trick.
+        stdscr.refresh()
 
-        if key == curses.KEY_UP:
-            selected_row = (selected_row - 1) % len(menu_items)
-        elif key == curses.KEY_DOWN:
-            selected_row = (selected_row + 1) % len(menu_items)
-        elif key == ord('q'):
-            return None
-        elif key == ord('s'):
-            return current_path
-        elif key == curses.KEY_ENTER or key in [10, 13]:
-            selected_item = menu_items[selected_row]
 
-            if selected_item == "[ Select Current Directory ]":
-                return current_path
-            elif selected_item == "[../]":
-                current_path = os.path.dirname(current_path)
-                selected_row = 0
-            else:
-                new_path = os.path.join(current_path, selected_item)
-                if os.path.isdir(new_path):
-                    current_path = new_path
-                    selected_row = 0
+    return selected_path if selected_path else None
 
 def get_text_input_tui(stdscr, prompt):
     input_text = ""
