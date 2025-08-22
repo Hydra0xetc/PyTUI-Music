@@ -94,6 +94,6 @@ def save_config(config_dict):
         else:
             f.write("paths = []\n\n")
             
-        f.write(f"volume = {config_dict.get('volume', 50)}\n")
+        f.write(f"volume = {int(config_dict.get('volume', 50))}\n")
         f.write(f"audio_backend = {config_dict.get('audio_backend', 'auto')}\n")
         f.write(f"cava = {config_dict.get('cava', True)}\n")
