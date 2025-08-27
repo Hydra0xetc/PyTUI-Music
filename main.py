@@ -2,7 +2,6 @@
 
 import os
 import curses
-import sys
 from config import load_config, save_config
 from tui import draw_menu, browse_path_tui, draw_message_box
 from player import player_tui

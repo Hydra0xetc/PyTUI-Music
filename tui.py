@@ -3,7 +3,7 @@ import os
 import subprocess
 import shutil
 from wcwidth import wcswidth
-from utils import truncate_string_to_width, get_scrolling_display_string
+from utils import truncate_string_to_width
 
 def draw_menu(stdscr, selected_row_idx, items, title_text, help_text):
     h, w = stdscr.getmaxyx()
@@ -14,7 +14,8 @@ def draw_menu(stdscr, selected_row_idx, items, title_text, help_text):
     max_line_width = max(1, w - 2) # Ensure min width of 1
     truncated_title = truncate_string_to_width(title_text, max_line_width)
     title_x = (w - wcswidth(truncated_title)) // 2
-    if title_x < 1: title_x = 1 # Ensure x position is at least 1
+    if title_x < 1:
+        title_x = 1 # Ensure x position is at least 1
     stdscr.addstr(1, title_x, truncated_title, curses.A_BOLD)
     
     # Ensure hline width is at least 1
@@ -48,7 +49,8 @@ def draw_menu(stdscr, selected_row_idx, items, title_text, help_text):
     # Truncate and center the help text
     truncated_help = truncate_string_to_width(help_text, max_line_width)
     help_x = (w - wcswidth(truncated_help)) // 2
-    if help_x < 1: help_x = 1 # Ensure x position is at least 1
+    if help_x < 1:
+        help_x = 1 # Ensure x position is at least 1
     
     # Ensure y and x positions are valid before adding string
     if h - 2 < h and help_x < w:
@@ -61,7 +63,8 @@ def draw_message_box(stdscr, message):
     
     # Calculate max message width, considering box borders and padding
     max_msg_width = w - 8  # w - (2*border + 2*padding_left + 2*padding_right)
-    if max_msg_width < 1: max_msg_width = 1 # Ensure it's at least 1
+    if max_msg_width < 1:
+        max_msg_width = 1 # Ensure it's at least 1
 
     truncated_message = truncate_string_to_width(message, max_msg_width)
     
@@ -69,15 +72,19 @@ def draw_message_box(stdscr, message):
     box_w = wcswidth(truncated_message) + 4 # 2 for padding, 2 for borders
     
     # Ensure box_w does not exceed terminal width
-    if box_w > w: box_w = w
-    if box_w < 10: box_w = 10 # Minimum width
+    if box_w > w:
+        box_w = w
+    if box_w < 10:
+        box_w = 10 # Minimum width
 
     box_y = (h - box_h) // 2
     box_x = (w - box_w) // 2
 
     # Ensure box_x and box_y are within bounds
-    if box_y < 0: box_y = 0
-    if box_x < 0: box_x = 0
+    if box_y < 0:
+        box_y = 0
+    if box_x < 0:
+        box_x = 0
 
     # Create a new window for the box
     box_win = curses.newwin(box_h, box_w, box_y, box_x)

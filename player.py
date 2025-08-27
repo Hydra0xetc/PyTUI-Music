@@ -48,13 +48,15 @@ def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlis
     if player.pause:
         paused_text = "[PAUSED]"
         paused_x = w - wcswidth(paused_text) - 2 # Position from right edge
-        if paused_x < 2: paused_x = 2 # Ensure it doesn't go off screen to the left
+        if paused_x < 2:
+            paused_x = 2 # Ensure it doesn't go off screen to the left
         stdscr.addstr(1, paused_x, paused_text, curses.A_REVERSE)
 
     if song_lock:
         lock_text = "[LOCKED]"
         lock_x = w - wcswidth(lock_text) - 2
-        if lock_x < 2: lock_x = 2
+        if lock_x < 2:
+            lock_x = 2
         stdscr.addstr(2, lock_x, lock_text, curses.A_REVERSE)
 
     stdscr.hline(4, 1, curses.ACS_HLINE, w - 2)
@@ -228,5 +230,3 @@ def player_tui(stdscr, folder_path, initial_volume, config):
     except Exception as e:
         draw_message_box(stdscr, f"An error occurred: {e}")
         curses.endwin()
-
-
