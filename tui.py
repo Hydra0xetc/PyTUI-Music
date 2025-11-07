@@ -5,7 +5,14 @@ import shutil
 from wcwidth import wcswidth
 from utils import truncate_string_to_width
 
-def draw_menu(stdscr, selected_row_idx, items, title_text, help_text):
+def draw_menu(
+    stdscr,
+    selected_row_idx,
+    items,
+    title_text,
+    help_text
+):
+
     h, w = stdscr.getmaxyx()
     stdscr.erase()
     stdscr.box()
@@ -42,7 +49,13 @@ def draw_menu(stdscr, selected_row_idx, items, title_text, help_text):
             # Ensure y and x positions are valid before adding string
             if start_line + i < h and x < w:
                 if item_idx == selected_row_idx:
-                    stdscr.addstr(start_line + i, x, truncated_name, curses.A_REVERSE)
+                    stdscr.addstr(
+                        start_line + i,
+                        x,
+                        truncated_name,
+                        curses.A_REVERSE
+                    )
+
                 else:
                     stdscr.addstr(start_line + i, x, truncated_name)
 
@@ -62,7 +75,7 @@ def draw_message_box(stdscr, message):
     h, w = stdscr.getmaxyx()
     
     # Calculate max message width, considering box borders and padding
-    max_msg_width = w - 8  # w - (2*border + 2*padding_left + 2*padding_right)
+    max_msg_width = w - 8  
     if max_msg_width < 1:
         max_msg_width = 1 # Ensure it's at least 1
 
@@ -103,10 +116,13 @@ def check_dependencies():
     """Check if fd and fzf are installed."""
     return shutil.which("fd") is not None and shutil.which("fzf") is not None
 
-def browse_path_tui(stdscr, start_path=None):
+def browse_path_tui(stdscr):
     """A TUI for browsing the filesystem using fd and fzf."""
     if not check_dependencies():
-        draw_message_box(stdscr, "Please install 'fd' and 'fzf' for path selection.")
+        draw_message_box(
+            stdscr,
+            "Please install 'fd' and 'fzf' for path selection."
+        )
         return None
 
     # Exit curses mode to run fzf
@@ -114,8 +130,6 @@ def browse_path_tui(stdscr, start_path=None):
 
     selected_path = None
     try:
-        # Run fd and pipe to fzf
-        # Start searching from the user's home directory
         home_dir = os.path.expanduser("~")
         # We search for directories in the home directory.
         command = f"fd -L --type d . '{home_dir}' | fzf"
@@ -123,15 +137,11 @@ def browse_path_tui(stdscr, start_path=None):
         # Using shell=True is necessary for the pipe
         process = subprocess.run(command, shell=True, capture_output=True, text=True, check=False)
         
-        # fzf returns a non-zero exit code (130) when the user cancels (e.g., by pressing Esc).
         if process.returncode == 0:
             selected_path = process.stdout.strip()
 
     finally:
-        # After the command, we need to get back into curses mode.
-        # A simple refresh of the stdscr should do the trick.
         stdscr.refresh()
-
 
     return selected_path if selected_path else None
 
@@ -158,6 +168,6 @@ def get_text_input_tui(stdscr, prompt):
         else:
             return None  # User cancelled
     finally:
-        curses.noecho()    # Disable echoing
-        curses.cbreak()    # Re-enable cbreak
-        stdscr.nodelay(True) # Set nodelay back to true
+        curses.noecho()    
+        curses.cbreak()    
+        stdscr.nodelay(True) 

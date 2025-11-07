@@ -2,7 +2,6 @@ import os
 import configparser
 from pathlib import Path
 
-# Define the path for the configuration file
 CONFIG_DIR = Path(os.path.expanduser("~/.config/PyTUI_Music"))
 CONFIG_FILE = CONFIG_DIR / "config.conf"
 
@@ -30,7 +29,7 @@ def load_config():
         stripped = line.strip()
         if stripped.startswith('paths = ['):
             in_paths_block = True
-            if stripped.endswith(']'): # for paths = []
+            if stripped.endswith(']'): 
                 in_paths_block = False
             continue
         
@@ -76,7 +75,9 @@ def save_config(config_dict):
     with open(CONFIG_FILE, 'w') as f:
         f.write("# PyTUI_Music Configuration File\n")
         f.write("#\n")
-        f.write("# 'paths' is a comma-separated list of directories where your music is stored.\n")
+        f.write("# 'paths' is a comma-separated list of directories where your"
+                "music is stored.\n"
+                )
         f.write("# Example: paths = /home/user/Music,/mnt/storage/Music\n")
         f.write("#\n")
         f.write("# 'volume' is the default volume level (0-150).\n")

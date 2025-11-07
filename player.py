@@ -11,7 +11,19 @@ from tui import draw_message_box
 
 supported_exts = ('.mp3', '.wav', '.flac', '.m4a', '.ogg')
 
-def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlist_view_offset, now_playing_text_scroll_offset, selected_song_text_scroll_offset, song_lock, config):
+def draw_player_tui(
+        stdscr,
+        player,
+        playlist,
+        selected_idx,
+        playing_idx,
+        playlist_view_offset,
+        now_playing_text_scroll_offset,
+        selected_song_text_scroll_offset,
+        song_lock,
+        config
+):
+
     h, w = stdscr.getmaxyx()
     max_width = w - 4
 
@@ -30,9 +42,11 @@ def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlis
     # Progress bar
     pos = player.playback_time or 0
     dur = player.duration or 0
-    time_str_base = f"{time.strftime('%M:%S', time.gmtime(pos))} / {time.strftime('%M:%S', time.gmtime(dur))}"
+    time_str_base = f"{time.strftime('%M:%S',
+                       time.gmtime(pos))} / {time.strftime('%M:%S',
+                       time.gmtime(dur))}"
 
-    bar_length_calc = min(30, w - wcswidth(time_str_base) - 10) # Use wcswidth for accurate calculation
+    bar_length_calc = min(30, w - wcswidth(time_str_base) - 10) 
     bar_str = ""
     if dur > 0 and bar_length_calc > 5:
         progress = (pos / dur)
@@ -47,7 +61,7 @@ def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlis
 
     if player.pause:
         paused_text = "[PAUSED]"
-        paused_x = w - wcswidth(paused_text) - 2 # Position from right edge
+        paused_x = w - wcswidth(paused_text) - 2 
         if paused_x < 2:
             paused_x = 2 # Ensure it doesn't go off screen to the left
         stdscr.addstr(1, paused_x, paused_text, curses.A_REVERSE)
@@ -80,18 +94,36 @@ def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlis
 
             max_song_width = max_width - len(prefix) - len(item_number) - 1
             if song_idx == selected_idx:
-                display_text = get_scrolling_display_string(song_name, max_song_width, selected_song_text_scroll_offset)
-                stdscr.addstr(start_line + i, 2, f"{prefix}{item_number} {display_text}", curses.A_REVERSE)
+                display_text = get_scrolling_display_string(
+                    song_name,
+                    max_song_width,
+                    selected_song_text_scroll_offset
+                )
+
+                stdscr.addstr(
+                    start_line + i,
+                    2,
+                    f"{prefix}{item_number} {display_text}",
+                    curses.A_REVERSE
+                )
+
             else:
-                display_text = truncate_string_to_width(song_name, max_song_width)
-                stdscr.addstr(start_line + i, 2, f"{prefix}{item_number} {display_text}")
+                display_text = truncate_string_to_width(
+                    song_name,
+                    max_song_width
+                )
+
+                stdscr.addstr(
+                    start_line + i,
+                    2,
+                    f"{prefix}{item_number} {display_text}"
+                )
 
     # Footer
     vol = player.volume
     help1 = f"Volume: {vol:.0f}% (9/0)"
     cava_help = " | C : cava" if config.get('cava', False) else ""
     help2 = f"↑/↓: Select | Enter: Play | p: Pause | l: Lock | b/n: Prev/Next{cava_help} | q: Exit"
-
 
     # Truncate help texts to fit within screen width
     max_footer_width = w - 4 # 2 chars padding on each side
@@ -102,7 +134,13 @@ def draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx, playlis
     stdscr.addstr(h - 2, w - wcswidth(truncated_help2) - 2, truncated_help2)
     stdscr.noutrefresh()
 
-def player_tui(stdscr, folder_path, initial_volume, config):
+def player_tui(
+        stdscr,
+        folder_path, 
+        initial_volume, 
+        config
+):
+
     curses.curs_set(0)
     stdscr.timeout(100)  # Faster response
 
@@ -125,6 +163,7 @@ def player_tui(stdscr, folder_path, initial_volume, config):
             audio_device=config.get('audio_backend', 'auto'),
             vo='null'
         )
+            
         player.volume = initial_volume
         player.loop_playlist = 'inf' # Loop the playlist indefinitely
 
@@ -144,7 +183,8 @@ def player_tui(stdscr, folder_path, initial_volume, config):
 
         while True:
             try:
-                playing_idx = player.playlist_pos if player.playlist_pos is not None else -1
+                playing_idx = player.playlist_pos \
+                if player.playlist_pos is not None else -1
 
                 if playing_idx != current_playing_id:
                     current_playing_id = playing_idx
@@ -155,9 +195,18 @@ def player_tui(stdscr, folder_path, initial_volume, config):
                     selected_song_text_scroll_offset = 0
                     last_selected_idx = selected_idx
 
-                draw_player_tui(stdscr, player, playlist, selected_idx, playing_idx,
-                                playlist_view_offset, now_playing_text_scroll_offset,
-                                selected_song_text_scroll_offset, song_lock, config)
+                draw_player_tui(
+                    stdscr,
+                    player,
+                    playlist,
+                    selected_idx,
+                    playing_idx,
+                    playlist_view_offset,
+                    now_playing_text_scroll_offset,
+                    selected_song_text_scroll_offset,
+                    song_lock, 
+                    config
+                )
 
                 now_playing_scroll_counter += 1
                 if now_playing_scroll_counter >= 3:  # Scroll faster
@@ -166,7 +215,6 @@ def player_tui(stdscr, folder_path, initial_volume, config):
                     now_playing_scroll_counter = 0
 
                 curses.doupdate()
-
 
             except Exception as e:
                 sys.stderr.write(f"Error in player loop: {e}\n")
@@ -186,44 +234,61 @@ def player_tui(stdscr, folder_path, initial_volume, config):
                         subprocess.run([exe])
                     except FileNotFoundError:
                         stdscr.clear()
-                        draw_message_box(stdscr, f"'{exe}' command not found. Please install it.")
+                        draw_message_box(
+                            stdscr,
+                            f"'{exe}' command not found. Please install it."
+                        )
+
                     except Exception as e:
                         stdscr.clear()
-                        draw_message_box(stdscr, f"Error running {exe}: {e}")
+                        draw_message_box(
+                            stdscr,
+                            f"Error running {exe}: {e}"
+                        )
+
                     stdscr.refresh()
                     continue
             elif key == curses.KEY_UP:
                 selected_idx = max(0, selected_idx - 1)
+
             elif key == curses.KEY_DOWN:
                 selected_idx = min(len(playlist) - 1, selected_idx + 1)
+
             elif key == curses.KEY_ENTER or key in [10, 13]:
                 player.playlist_pos = selected_idx
                 player.pause = False
+
             elif key == ord('p'):
                 player.pause = not player.pause
+
             elif key == ord('l'):
                 song_lock = not song_lock
                 player.loop_file = 'inf' if song_lock else False
+
             elif key == ord('b'):
                 if len(playlist) > 0:
                     if player.playlist_pos == 0:
                         player.playlist_pos = len(playlist) - 1
                     else:
                         player.playlist_prev()
+
             elif key == ord('n'):
                 if len(playlist) > 0:
                     if player.playlist_pos == len(playlist) - 1:
                         player.playlist_pos = 0
                     else:
                         player.playlist_next()
+
             elif key == ord('9'):
                 player.volume = max(0, player.volume - 2)
                 config['volume'] = player.volume
                 save_config(config)
+
             elif key == ord('0'):
                 player.volume = min(150, player.volume + 2)
                 config['volume'] = player.volume
                 save_config(config)
+
             elif key == ord('q'):
                 player.quit()
                 break
