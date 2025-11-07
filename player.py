@@ -179,16 +179,17 @@ def player_tui(stdscr, folder_path, initial_volume, config):
                 continue
 
             if key == ord('C'):
-                if config.get('cava', False):
+                exe = config.get('background')
+                if exe:
                     curses.endwin()
                     try:
-                        subprocess.run(['cava'])
+                        subprocess.run([exe])
                     except FileNotFoundError:
                         stdscr.clear()
-                        draw_message_box(stdscr, "Cava command not found. Please install it.")
+                        draw_message_box(stdscr, f"'{exe}' command not found. Please install it.")
                     except Exception as e:
                         stdscr.clear()
-                        draw_message_box(stdscr, f"Error running Cava: {e}")
+                        draw_message_box(stdscr, f"Error running {exe}: {e}")
                     stdscr.refresh()
                     continue
             elif key == curses.KEY_UP:

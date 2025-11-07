@@ -14,7 +14,7 @@ def load_config():
             'paths': [],
             'volume': 50,
             'audio_backend': 'auto',
-            'cava': True
+            'background': 'cava'
         }
         save_config(default_config_dict)
         return default_config_dict
@@ -52,14 +52,14 @@ def load_config():
     if 'Settings' in parser:
         settings = parser['Settings']
         config['volume'] = settings.getint('volume', 50)
-        config['cava'] = settings.getboolean('cava', True)
+        config['background'] = settings.get('background')
         config['audio_backend'] = settings.get('audio_backend', 'auto')
 
     config['paths'] = paths
     
     # Set defaults and validate
     config.setdefault('volume', 50)
-    config.setdefault('cava', True)
+    config.setdefault('background', 'cava')
     config.setdefault('audio_backend', 'auto')
     config.setdefault('paths', [])
     
@@ -81,7 +81,6 @@ def save_config(config_dict):
         f.write("#\n")
         f.write("# 'volume' is the default volume level (0-150).\n")
         f.write("#\n")
-        f.write("# 'cava' can be set to True to enable the CAVA audio visualizer (requires CAVA to be installed).\n\n")
         
         f.write("[Settings]\n")
         
@@ -96,4 +95,4 @@ def save_config(config_dict):
             
         f.write(f"volume = {int(config_dict.get('volume', 50))}\n")
         f.write(f"audio_backend = {config_dict.get('audio_backend', 'auto')}\n")
-        f.write(f"cava = {config_dict.get('cava', True)}\n")
+        f.write(f"background = {config_dict.get('background', 'cava')}\n")
