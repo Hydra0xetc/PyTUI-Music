@@ -4,9 +4,10 @@ import time
 import sys
 import mpv
 import subprocess
+from datetime import datetime, timedelta
 from wcwidth import wcswidth
 from utils import truncate_string_to_width, get_scrolling_display_string
-from config import save_config
+from config import save_config, load_seen_songs, save_seen_songs
 from tui import draw_message_box
 
 supported_exts = ('.mp3', '.wav', '.flac', '.m4a', '.ogg')
@@ -21,7 +22,8 @@ def draw_player_tui(
         now_playing_text_scroll_offset,
         selected_song_text_scroll_offset,
         song_lock,
-        config
+        config,
+        new_songs_indices
 ):
 
     h, w = stdscr.getmaxyx()
@@ -79,17 +81,18 @@ def draw_player_tui(
     playlist_h = h - 7
     start_line = 5
 
-    # Adjust playlist_view_offset
-    if selected_idx >= playlist_h + playlist_view_offset:
-        playlist_view_offset = selected_idx - playlist_h + 1
-    elif selected_idx < playlist_view_offset:
-        playlist_view_offset = selected_idx
+
 
     for i in range(playlist_h):
         song_idx = i + playlist_view_offset
         if song_idx < len(playlist):
             song_name = os.path.basename(playlist[song_idx])
-            prefix = ">  " if song_idx == playing_idx else "  "
+            
+            indicator_char = "*" if song_idx in new_songs_indices else " "
+            selection_char = "> " if song_idx == playing_idx else " "
+            
+            prefix = f"{indicator_char}{selection_char} " 
+            
             item_number = f"{song_idx + 1}."
 
             max_song_width = max_width - len(prefix) - len(item_number) - 1
@@ -154,6 +157,37 @@ def player_tui(
         draw_message_box(stdscr, "No audio files found in this folder.")
         return
 
+    seen_songs_data = load_seen_songs()
+    new_songs_indices = []
+    songs_to_update = {}
+    now = datetime.now()
+    one_day_ago = now - timedelta(days=1)
+
+    if not seen_songs_data:
+        # First run with this feature. Mark all current songs as "seen"
+        # with an old timestamp to avoid surprising the user.
+        new_songs_indices = []
+        songs_to_update = {} # Nothing to update on quit for this special case
+        
+        initial_data = {song: one_day_ago.isoformat() for song in playlist}
+        save_seen_songs(initial_data)
+        seen_songs_data = initial_data # Use this data for the current session
+    else:
+        # Normal run, check for new songs within the last 24 hours.
+        for i, song in enumerate(playlist):
+            if song not in seen_songs_data:
+                new_songs_indices.append(i)
+                songs_to_update[song] = now.isoformat()
+            else:
+                try:
+                    seen_timestamp = datetime.fromisoformat(seen_songs_data[song])
+                    if seen_timestamp > one_day_ago:
+                        new_songs_indices.append(i)
+                except (ValueError, TypeError):
+                    # If data is malformed, treat as new and fix it.
+                    new_songs_indices.append(i)
+                    songs_to_update[song] = now.isoformat()
+
     try:
         player = mpv.MPV(
             video=False,
@@ -183,6 +217,14 @@ def player_tui(
 
         while True:
             try:
+                # Adjust playlist_view_offset (scrolling logic)
+                h, w = stdscr.getmaxyx()
+                playlist_h = h - 7
+                if selected_idx >= playlist_h + playlist_view_offset:
+                    playlist_view_offset = selected_idx - playlist_h + 1
+                elif selected_idx < playlist_view_offset:
+                    playlist_view_offset = selected_idx
+
                 playing_idx = player.playlist_pos \
                 if player.playlist_pos is not None else -1
 
@@ -205,7 +247,8 @@ def player_tui(
                     now_playing_text_scroll_offset,
                     selected_song_text_scroll_offset,
                     song_lock, 
-                    config
+                    config,
+                    new_songs_indices
                 )
 
                 now_playing_scroll_counter += 1
@@ -290,6 +333,8 @@ def player_tui(
                 save_config(config)
 
             elif key == ord('q'):
+                seen_songs_data.update(songs_to_update)
+                save_seen_songs(seen_songs_data)
                 player.quit()
                 break
 

@@ -1,9 +1,28 @@
 import os
 import configparser
+import json
 from pathlib import Path
 
 CONFIG_DIR = Path(os.path.expanduser("~/.config/PyTUI_Music"))
 CONFIG_FILE = CONFIG_DIR / "config.conf"
+SEEN_SONGS_FILE = CONFIG_DIR / "seen_songs.json"
+
+def load_seen_songs():
+    """Loads the dictionary of seen songs from the JSON file."""
+    if not SEEN_SONGS_FILE.is_file():
+        return {}
+    with open(SEEN_SONGS_FILE, 'r') as f:
+        try:
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
+        except json.JSONDecodeError:
+            return {}
+
+def save_seen_songs(seen_songs_dict):
+    """Saves the dictionary of seen songs to the JSON file."""
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    with open(SEEN_SONGS_FILE, 'w') as f:
+        json.dump(seen_songs_dict, f, indent=2)
 
 def load_config():
     """Loads the configuration from the config file, creating it if it doesn't exist."""
