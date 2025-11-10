@@ -116,7 +116,12 @@ def run_app_tui(stdscr):
         if selected_base_path:
             folder_to_play = choose_folder_tui(stdscr, selected_base_path)
             if folder_to_play:
-                player_tui(stdscr, folder_to_play, config['volume'], config)
+                player_tui(
+                    stdscr,
+                    folder_to_play,
+                    config['volume'],
+                    config
+                )
             else: 
                 continue
         else:

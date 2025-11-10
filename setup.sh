@@ -52,4 +52,6 @@ fi
 
 install_requirements
 
+chmod +x main.py
+
 echo -e "${ORANGE}Now Run ./main.py${NC}"

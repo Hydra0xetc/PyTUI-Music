@@ -57,7 +57,11 @@ def draw_menu(
                     )
 
                 else:
-                    stdscr.addstr(start_line + i, x, truncated_name)
+                    stdscr.addstr(
+                        start_line + i,
+                        x,
+                        truncated_name
+                    )
 
     # Truncate and center the help text
     truncated_help = truncate_string_to_width(help_text, max_line_width)
@@ -135,7 +139,13 @@ def browse_path_tui(stdscr):
         command = f"fd -L --type d . '{home_dir}' | fzf"
         
         # Using shell=True is necessary for the pipe
-        process = subprocess.run(command, shell=True, capture_output=True, text=True, check=False)
+        process = subprocess.run(
+            command,
+            shell=True, 
+            capture_output=True,
+            text=True,
+            check=False
+        )
         
         if process.returncode == 0:
             selected_path = process.stdout.strip()

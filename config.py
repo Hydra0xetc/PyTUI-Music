@@ -22,7 +22,7 @@ def save_seen_songs(seen_songs_dict):
     """Saves the dictionary of seen songs to the JSON file."""
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     with open(SEEN_SONGS_FILE, 'w') as f:
-        json.dump(seen_songs_dict, f, indent=2)
+        json.dump(seen_songs_dict, f, indent=4)
 
 def load_config():
     """Loads the configuration from the config file, creating it if it doesn't exist."""
