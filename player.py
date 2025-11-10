@@ -159,34 +159,32 @@ def player_tui(
 
     seen_songs_data = load_seen_songs()
     new_songs_indices = []
-    songs_to_update = {}
     now = datetime.now()
-    one_day_ago = now - timedelta(days=1)
 
-    if not seen_songs_data:
-        # First run with this feature. Mark all current songs as "seen"
-        # with an old timestamp to avoid surprising the user.
+    # Check if the folder path is a key in our data.
+    if folder_path not in seen_songs_data:
+        # This is a new folder.
+        # 1. Don't show any asterisks for this run.
         new_songs_indices = []
-        songs_to_update = {} # Nothing to update on quit for this special case
         
-        initial_data = {song: one_day_ago.isoformat() for song in playlist}
-        save_seen_songs(initial_data)
-        seen_songs_data = initial_data # Use this data for the current session
+        # 2. Create a new dictionary for this folder's songs.
+        new_folder_data = {}
+        for song_full_path in playlist:
+            filename = os.path.basename(song_full_path)
+            new_folder_data[filename] = now.isoformat()
+            
+        # 3. Add this new folder's data to the main structure.
+        seen_songs_data[folder_path] = new_folder_data
     else:
-        # Normal run, check for new songs within the last 24 hours.
-        for i, song in enumerate(playlist):
-            if song not in seen_songs_data:
+        # This is an existing folder. Check for new songs.
+        current_folder_data = seen_songs_data[folder_path]
+        for i, song_full_path in enumerate(playlist):
+            filename = os.path.basename(song_full_path)
+            if filename not in current_folder_data:
+                # It's a new song in an old folder. Mark it as new.
                 new_songs_indices.append(i)
-                songs_to_update[song] = now.isoformat()
-            else:
-                try:
-                    seen_timestamp = datetime.fromisoformat(seen_songs_data[song])
-                    if seen_timestamp > one_day_ago:
-                        new_songs_indices.append(i)
-                except (ValueError, TypeError):
-                    # If data is malformed, treat as new and fix it.
-                    new_songs_indices.append(i)
-                    songs_to_update[song] = now.isoformat()
+                # Add the new song to the data for saving.
+                current_folder_data[filename] = now.isoformat()
 
     try:
         player = mpv.MPV(
@@ -333,7 +331,6 @@ def player_tui(
                 save_config(config)
 
             elif key == ord('q'):
-                seen_songs_data.update(songs_to_update)
                 save_seen_songs(seen_songs_data)
                 player.quit()
                 break
