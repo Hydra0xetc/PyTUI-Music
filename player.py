@@ -4,7 +4,7 @@ import time
 import sys
 import mpv
 import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime
 from wcwidth import wcswidth
 from utils import truncate_string_to_width, get_scrolling_display_string
 from config import save_config, load_seen_songs, save_seen_songs
