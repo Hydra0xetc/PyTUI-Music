@@ -216,7 +216,7 @@ def player_tui(
         while True:
             try:
                 # Adjust playlist_view_offset (scrolling logic)
-                h, w = stdscr.getmaxyx()
+                h, _ = stdscr.getmaxyx()
                 playlist_h = h - 7
                 if selected_idx >= playlist_h + playlist_view_offset:
                     playlist_view_offset = selected_idx - playlist_h + 1
