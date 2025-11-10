@@ -142,7 +142,7 @@ def player_tui(
         folder_path, 
         initial_volume, 
         config
-):
+    ):
 
     curses.curs_set(0)
     stdscr.timeout(100)  # Faster response

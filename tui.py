@@ -11,7 +11,7 @@ def draw_menu(
     items,
     title_text,
     help_text
-):
+    ):
 
     h, w = stdscr.getmaxyx()
     stdscr.erase()
