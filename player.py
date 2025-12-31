@@ -125,16 +125,12 @@ def draw_player_tui(
     # Footer
     vol = player.volume
     help1 = f"Volume: {vol:.0f}% (9/0)"
-    cava_help = " | C : cava" if config.get('cava', False) else ""
-    help2 = f"↑/↓: Select | Enter: Play | p: Pause | l: Lock | b/n: Prev/Next{cava_help} | q: Exit"
 
     # Truncate help texts to fit within screen width
     max_footer_width = w - 4 # 2 chars padding on each side
     truncated_help1 = truncate_string_to_width(help1, max_footer_width)
-    truncated_help2 = truncate_string_to_width(help2, max_footer_width)
 
     stdscr.addstr(h - 2, 2, truncated_help1)
-    stdscr.addstr(h - 2, w - wcswidth(truncated_help2) - 2, truncated_help2)
     stdscr.noutrefresh()
 
 def player_tui(
