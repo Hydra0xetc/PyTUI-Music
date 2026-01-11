@@ -119,8 +119,7 @@ def run_app_tui(stdscr):
                 player_tui(
                     stdscr,
                     folder_to_play,
-                    config['volume'],
-                    config
+                    config,
                 )
             else: 
                 continue
