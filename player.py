@@ -197,8 +197,12 @@ def player_tui(stdscr, folder_path, config):
         elif key in (10, 13):
             play_song(selected_idx)
         elif key == ord('p') and current_player_id:
-            pause(current_player_id)
-            is_paused = not is_paused
+            if is_paused:
+                play(current_player_id)   # RESUME
+                is_paused = False
+            else:
+                pause(current_player_id)  # PAUSE
+                is_paused = True
         elif key == ord('n'):
             if playing_idx != -1:
                 next_idx = (playing_idx + 1) % len(playlist)
