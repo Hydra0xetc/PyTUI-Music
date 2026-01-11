@@ -8,7 +8,7 @@
 - **File & Directory Browser**: Easily browse your filesystem to add music directories.
 - **Playlist Management**: Automatically creates a playlist from the audio files in a selected folder.
 - **Playback Control**: Play, pause, skip tracks, and control volume with simple keybindings.
-- **Configuration File**: Saves your music paths and volume settings in a `~/.configure.json` file.
+- **Configuration File**: Saves your music paths and volume settings in a `~/.config/PyTUI_Music/config.conf` file.
 
 ## Installation
 
@@ -21,34 +21,14 @@
     ```
 
     The required libraries are:
-    - `python-mpv`
     - `wcwidth`
-
-3.  **Install `mpv` player.** This application is a required backend for `python-mpv`.
-
-    - **For Termux:**
-      ```bash
-      pkg install mpv
-      ```
-
-    - **For Debian/Ubuntu:**
-      ```bash
-      sudo apt update && sudo apt install mpv
-      ```
-
-    - **For Arch Linux:**
-      ```bash
-      sudo pacman -S mpv
-      ```
-
-    For other operating systems, please see the [mpv installation guide](https://mpv.io/installation/).
 
 ## How to Use
 
 1.  **Run the application:**
 
     ```bash
-    ./main.py
+    python main.py
     ```
 
 2.  **Adding a Music Path:**
@@ -72,6 +52,5 @@
     - **p**: Toggle play/pause.
     - **b**: Play the previous song.
     - **n**: Play the next song.
-    - **9/0**: Decrease/increase volume.
     - **l**: Lock the song.
     - **q**: Quit the player and return to the folder selection menu.
