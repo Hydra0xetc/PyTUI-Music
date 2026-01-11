@@ -26,11 +26,12 @@ def _load_library(library_path: Optional[str] = None) -> ctypes.CDLL:
         lib_name = "libAndroPlayer.so"
         
         # Cari di beberapa lokasi
+        cwd = os.path.dirname(os.path.abspath(__file__))
         search_paths = [
             os.path.join(os.path.dirname(__file__), lib_name),
             os.path.join(".", lib_name),
-            os.path.join("./lib/", lib_name),
-            os.path.join("./audio/", lib_name),
+            os.path.join(cwd, "./lib/", lib_name),
+            os.path.join(cwd, "./audio/", lib_name),
             os.path.join("/usr/local/lib", lib_name),
             os.path.join("/usr/lib", lib_name),
         ]

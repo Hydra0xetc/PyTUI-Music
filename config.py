@@ -30,8 +30,6 @@ def load_config():
         # Create default config if it doesn't exist
         default_config_dict = {
             'paths': [],
-            'volume': 50,
-            'audio_backend': 'auto',
             'background': 'cava'
         }
         save_config(default_config_dict)
@@ -69,23 +67,17 @@ def load_config():
     config = {}
     if 'Settings' in parser:
         settings = parser['Settings']
-        config['volume'] = settings.getint('volume', 50)
         config['background'] = settings.get('background')
-        config['audio_backend'] = settings.get('audio_backend', 'auto')
 
     config['paths'] = paths
     
     # Set defaults and validate
-    config.setdefault('volume', 50)
     config.setdefault('background', 'cava')
-    config.setdefault('audio_backend', 'auto')
     config.setdefault('paths', [])
     
     config['paths'] = sorted(list(set(config['paths'])))
-    config['volume'] = max(0, min(150, config['volume']))
 
     return config
-
 
 def save_config(config_dict):
     """Saves the configuration dictionary to the config file."""
@@ -99,8 +91,6 @@ def save_config(config_dict):
                 )
         f.write("# Example: paths = /home/user/Music,/mnt/storage/Music\n")
         f.write("#\n")
-        f.write("# 'volume' is the default volume level (0-150).\n")
-        f.write("#\n")
         
         f.write("[Settings]\n")
         
@@ -113,6 +103,4 @@ def save_config(config_dict):
         else:
             f.write("paths = []\n\n")
             
-        f.write(f"volume = {int(config_dict.get('volume', 50))}\n")
-        f.write(f"audio_backend = {config_dict.get('audio_backend', 'auto')}\n")
         f.write(f"background = {config_dict.get('background', 'cava')}\n")

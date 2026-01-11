@@ -162,7 +162,6 @@ def player_tui(stdscr, folder_path, config):
             if was_playing and not playing_now and not is_paused:
                 if not song_lock:
                     next_idx = (playing_idx + 1) % len(playlist)
-                    selected_idx = next_idx
                     play_song(next_idx)
 
             was_playing = playing_now
