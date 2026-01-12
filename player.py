@@ -81,7 +81,7 @@ def draw_player_tui(
             txt = truncate_string_to_width(name, max_w)
             stdscr.addstr(start + i, 2, f"{prefix}{num} {txt}")
 
-    footer = "ENTER: Play | p: Pause | n/b: Next/Prev | l: Loop | q: Quit"
+    footer = "Enter: Play | p: Pause | n/b: Next/Prev | l: Loop | q: Quit"
     stdscr.addstr(h - 2, 2, truncate_string_to_width(footer, w - 4))
     stdscr.noutrefresh()
 
